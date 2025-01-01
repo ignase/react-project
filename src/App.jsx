@@ -8,9 +8,16 @@ import { WinnerModal } from "./components/WinnerModal";
 import { GameBoard } from "./components/GameBoard";
 
 function App() {
-  const [board, setBoard] = useState(Array(9).fill(null));
+  const [board, setBoard] = useState(() => {
+    const boardFromStorage = window.localStorage.getItem("board");
+    if (boardFromStorage) return JSON.parse(boardFromStorage);
+    return Array(9).fill(null);
+  });
 
-  const [turn, setTurn] = useState(TURNS.X);
+  const [turn, setTurn] = useState(() => {
+    const turnFromStorage = window.localStorage.getItem("turn");
+    return turnFromStorage ? turnFromStorage : TURNS.X;
+  });
 
   const [winner, setWinner] = useState(null);
 
@@ -32,6 +39,8 @@ function App() {
     setBoard(Array(9).fill(null));
     setTurn(TURNS.X);
     setWinner(null);
+    window.localStorage.removeItem("board");
+    window.localStorage.removeItem("turn");
   };
 
   const checkEndGame = (newBoard) => {
@@ -41,6 +50,7 @@ function App() {
   const updateBoard = (index) => {
     //if position is not empty, do nothing
     if (board[index] || winner) return;
+
     //update board
     const newBoard = [...board];
     newBoard[index] = turn;
@@ -56,6 +66,10 @@ function App() {
     //know who's turn
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X;
     setTurn(newTurn);
+
+    //save game in localStorage
+    window.localStorage.setItem("board", JSON.stringify(newBoard));
+    window.localStorage.setItem("turn", newTurn);
   };
 
   return (
